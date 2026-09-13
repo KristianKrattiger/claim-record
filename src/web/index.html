@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Claim / Record</title>
+  <style>
+    :root { color-scheme: light dark; font-family: ui-sans-serif, system-ui, sans-serif; }
+    body { max-width: 52rem; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.25rem; }
+    .piles { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .pile { border: 1px dashed #888; min-height: 8rem; padding: 0.75rem; }
+    .pile h2 { font-size: 0.95rem; margin: 0 0 0.5rem; }
+    label, button { display: block; margin: 0.75rem 0; }
+    pre { white-space: pre-wrap; font-size: 0.85rem; }
+    .row { border-left: 3px solid #888; padding-left: 0.75rem; margin: 1rem 0; }
+    .divergent { border-color: #b00; }
+    .refusal { color: #b00; }
+    .note { color: #666; font-size: 0.85rem; }
+    .files { font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <h1>Claim / Record</h1>
+  <p class="note">Not legal advice. Quotes must be exact substrings of the files you upload. Only <code>.txt</code> and <code>.md</code>.</p>
+  <div class="piles">
+    <div class="pile" id="claim-drop">
+      <h2>Claim</h2>
+      <input type="file" id="claim" accept=".txt,.md,text/plain,text/markdown" multiple />
+      <div class="files" id="claim-list"></div>
+    </div>
+    <div class="pile" id="record-drop">
+      <h2>Record</h2>
+      <input type="file" id="record" accept=".txt,.md,text/plain,text/markdown" multiple />
+      <div class="files" id="record-list"></div>
+    </div>
+  </div>
+  <label>Subject <input id="subject" type="text" value="uptime" /></label>
+  <label>Model
+    <select id="client">
+      <option value="anthropic">Anthropic (ANTHROPIC_API_KEY)</option>
+      <option value="ollama">Ollama (local)</option>
+    </select>
+  </label>
+  <label><input id="narrate" type="checkbox" /> Narrate (experimental) — off by default; restates ledger rows only</label>
+  <button id="run" type="button">Run</button>
+  <div id="out"></div>
+  <script type="module">
+    async function readFiles(input) {
+      const files = [...input.files]
+      return Promise.all(files.map(async (f) => ({ name: f.name, text: await f.text() })))
+    }
+    function list(id, files) {
+      document.getElementById(id).textContent = files.length ? files.map((f) => f.name).join(", ") : ""
+    }
+    document.getElementById("claim").addEventListener("change", async (e) => {
+      list("claim-list", await readFiles(e.target))
+    })
+    document.getElementById("record").addEventListener("change", async (e) => {
+      list("record-list", await readFiles(e.target))
+    })
+    document.getElementById("run").addEventListener("click", async () => {
+      const out = document.getElementById("out")
+      out.textContent = "running…"
+      const body = {
+        subject: document.getElementById("subject").value,
+        claim: await readFiles(document.getElementById("claim")),
+        record: await readFiles(document.getElementById("record")),
+        client: document.getElementById("client").value,
+        narrate: document.getElementById("narrate").checked,
+      }
+      const res = await fetch("/assay", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      const data = await res.json()
+      if (!res.ok) { out.innerHTML = `<p class="refusal">${data.error}</p>`; return }
+      const r = data.result
+      if (r.outcome === "refusal") {
+        out.innerHTML = `<p class="refusal">Refusal: ${r.reason}</p><p>${r.detail ?? ""}</p>`
+        return
+      }
+      const labels = r.labels ?? { claimant: "Claim", independent: "Record" }
+      const html = (r.rows ?? []).map((row) => {
+        const sides = (row.sides ?? []).map((s) => {
+          const doc = (r.docs ?? []).find((d) => d.docId === s.docId)
+          const role = doc?.role === "claimant" ? labels.claimant : labels.independent
+          return `<div><strong>${role}</strong> ${doc?.label ?? s.docId}<blockquote>${s.text}</blockquote></div>`
+        }).join("")
+        const prov = row.provenance ? ` [${row.provenance.class}]` : ""
+        return `<div class="row ${row.status}">${row.status} — ${row.statement}${prov}${sides}</div>`
+      }).join("")
+      const nar = data.narrative?.paragraphs?.length
+        ? `<h2>Narrative</h2>` + data.narrative.paragraphs.map((p) => `<p>${p.text}</p>`).join("")
+        : ""
+      out.innerHTML = html + nar
+    })
+  </script>
+</body>
+</html>
