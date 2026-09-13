@@ -23,7 +23,7 @@ function ledger(rows: LedgerRow[]): Ledger {
     docs: [],
     failures: [],
     rows,
-    audit: { proposed: 1, admitted: rows.length, denied: [] },
+    audit: { proposed: 1, admitted: rows.length, denied: [], claimantChunks: 0, claimantCovered: 0, claimantOmitted: 0, independentDocsAdmitted: 0 },
   }
 }
 

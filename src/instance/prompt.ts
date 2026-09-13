@@ -26,7 +26,14 @@ Rules:
   bare names are discarded.
 - For contradicts, corroborates, and updates, "from" must be a claimant
   (Claim) excerpt and "to" an independent (Record) excerpt.
-- "statement" is a short neutral label for the claim.
+- "statement" is a short neutral label for what the Claim quote asserts, not
+  a question the Record poses.
+- A grant of certiorari, a question presented, or a statement of the issue
+  (including "we granted certiorari to resolve" and a quote that only asks
+  whether a claim will lie) is not a holding. Do not offer it as
+  corroboration of either answer. Quote the holding.
+- If the Record both contradicts and appears to confirm the same Claim span,
+  propose only the contradiction.
 - Only call a Claim statement unsupported if it makes a specific checkable
   assertion. Vague adjectives are not claims.
 - An aggregator is a conduit, not a source. A Record excerpt whose link points

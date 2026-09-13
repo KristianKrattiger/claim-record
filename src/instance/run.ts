@@ -44,6 +44,9 @@ export async function runClaimRecord(input: RunInput): Promise<RunOutput> {
     client: input.client,
     system: CLAIM_RECORD_SYSTEM,
     runs: 1,
+    // More files → more independent chunks, so a 10-opinion record pile is not
+    // squeezed into the same 40-slot budget as a two-file uptime fixture.
+    candidates: Math.max(40, 8 * uploads.length),
   })
   if (!input.narrate || result.outcome !== "ledger") return { result, corpus }
   return { result, corpus, narrative: narrate(result, corpus) }
