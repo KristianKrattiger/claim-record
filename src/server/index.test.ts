@@ -15,5 +15,7 @@ describe("createApp", () => {
     expect(html).toContain("Not legal advice")
     expect(html).toContain("id=\"narrate\"")
     expect(html).not.toMatch(/id="narrate"[^>]*checked/)
+    expect(html).toContain("context_unverified")
+    expect(html).toContain("claimantCovered")
   })
 })

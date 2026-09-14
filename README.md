@@ -33,12 +33,13 @@ Open http://127.0.0.1:8787
 Each row is one Claim sentence and what the Record did to it:
 
 - **divergent** — the Record contradicts it, or reports a newer state
-- **corroborated** — the Record confirms it, and the confirming quote is not an issue statement or argument
+- **corroborated** — the Record confirms it with a holding (or equivalent), not an issue statement or argument
+- **context_unverified** — the Record quote is unmarked and no holding in the pile competes; the span exists, it is not treated as confirmation
 - **unverified** — the Claim is specific, and no Record excerpt was admitted as speaking to it
 
-The same Claim sentence should not appear as both divergent and corroborated. If both are proposed, the contradiction is kept. A grant of certiorari, a question presented, or an argument sentence cannot corroborate either answer.
+The same Claim sentence should not appear as both divergent and corroborated. If both are proposed, the contradiction is kept — unless that contradiction is an unmarked Record sentence and another Record document already holds on that Claim span, in which case the unmarked pairing is denied. A grant of certiorari, a question presented, or an argument sentence cannot corroborate either answer. An unmarked Record sentence cannot corroborate or contradict when another Record document already holds on that Claim span.
 
-Coverage lives on `result.audit`: `claimantChunks`, `claimantCovered`, `claimantOmitted`. A quiet ledger is uninformative without those numbers.
+The result header and footer print the same audit: coverage (`claimantCovered / claimantChunks`), proposed/admitted, Record docs on the ledger (`independentDocsAdmitted / independentDocsTotal`), issue-statement denials, context-unverified counts, a denial-code tally, and the first line of each omitted Claim chunk. A quiet ledger is uninformative without those numbers.
 
 ## Tests
 
@@ -46,7 +47,7 @@ Coverage lives on `result.audit`: `claimantChunks`, `claimantCovered`, `claimant
 npm test
 ```
 
-Includes an in-repo 10(b)-shaped gold corpus under `src/assay/calibration/` (not the Desktop pile). One named residual case — an unmarked Record span with no holding competitor in that document — is required to still admit. That leftover is curator work, not assumed solved.
+Includes an in-repo 10(b)-shaped gold corpus under `src/assay/calibration/` (not the Desktop pile). One named residual case — an unmarked Record span with no holding competitor in the pile — is required to admit as `context_unverified`, not green. That leftover is curator work, labeled not solved.
 
 ## Sync Assay
 

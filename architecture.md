@@ -35,7 +35,7 @@ corpus + subject
 
 **Select.** Distinctive terms from the subject plus Claim text rank chunks for the model. Admission still uses `tokenize(subject)` only, so the relevance floor is not diluted by the whole Claim pile.
 
-**Propose.** The model sees excerpts tagged `claimant` or `independent`. Claim / Record passes `CLAIM_RECORD_SYSTEM` (`src/instance/prompt.ts`). A quote that is not a substring of its excerpt is discarded later, so an approximate quote is worse than no proposal.
+**Propose.** The model sees excerpts tagged `claimant` or `independent`. Claim / Record passes `CLAIM_RECORD_SYSTEM` (`src/instance/prompt.ts`). Every checkable Claim sentence in those excerpts is in scope; a pass that does not speak to a sentence must skip it rather than invent a pairing. A quote that is not a substring of its excerpt is discarded later, so an approximate quote is worse than no proposal.
 
 **Admit.** Re-derives offsets from the uploaded bytes. Denials are kept on the audit, not dropped. Among overlapping Claim spans, contradictions are judged before corroborations before unsupported claims. One Claim sentence is one row.
 
@@ -46,10 +46,11 @@ Claim / Record sizes the candidate budget with the pile: `max(40, 8 × uploads)`
 ## What a row is
 
 `divergent` — `contradicts` or `updates`.
-`corroborated` — `corroborates`.
+`corroborated` — `corroborates` whose independent sentence is a holding.
+`context_unverified` — `corroborates` whose independent sentence is unmarked and no holding in the pile competes.
 `unverified` — `unsupported`.
 
-Green is not a score on the whole pile. It is this Claim sentence, confirmed by this Record quote.
+Green is not a score on the whole pile. It is this Claim sentence, confirmed by a holding-like Record quote. Amber `context_unverified` means the bytes exist; it is not confirmation.
 
 ## Gates that are not `findAnchor`
 
@@ -57,24 +58,29 @@ Exact-substring verification stops fabrication. It does not stop quote-mining. A
 
 **Discourse role** (`src/assay/bookkeeper/discourse.ts`). Expand the independent quote to its enclosing sentence (`.?!` or newline). Closed lexicon: `issue` (cert grant, question presented, whether … will lie), `argument` (petitioner argues, some courts have held, …), `holding` (`we hold`, `Held:`, …), else `unmarked`. Corroboration of `issue` or `argument` is denied `ISSUE_STATEMENT`.
 
-**Same-document holding competitor.** If the proposed independent sentence is not a holding, and another sentence in that same Record document is a holding and IDF-relevant to the pair, corroboration is denied `ISSUE_STATEMENT`. The holding is not substituted for the quote.
+**Same-document holding competitor.** If the proposed independent sentence is not a holding, and another sentence in that same Record document is a holding and competes with the claim, corroboration is denied `ISSUE_STATEMENT`. The holding is not substituted for the quote.
 
-**Residual.** An unmarked span with no holding competitor in that document still admits. That is curator work. The calibration fixture includes one such trap and requires it to admit, so the leftover rate is counted rather than assumed solved. `CONTEXT_UNVERIFIED` as a ledger row type is not in this tree.
+**Cross-document holding competitor.** Same check against *other* independent documents, using the claimant quote (not the independent envelope) so a scienter holding does not veto an unmarked statute sentence that only shares `10` and `b`. Two shared content tokens (≥4 letters, closed stoplist) also count as competition when IDF mass is dominated by unmatched claim words. The check applies to **contradiction** as well as corroboration: an unmarked commentators sentence cannot paint a true claim divergent when another Record document already holds on that span.
+
+**Residual.** An unmarked span with no holding competitor in the pile still admits as `context_unverified`. That is curator work, labeled not solved. A live ROC sweep is not implemented; canned four-class rates live in `src/assay/calibration/`.
 
 **Independence.** A Record span that links to a Claim-side domain is `SELF_SOURCED`. That is non-independence, not credibility.
 
 **Standing.** Optional `standing` on a document: `binding` | `persuasive` | `interested` | `unrated`. Absent means unrated (today’s equality). Assay never infers or writes the field. Interested corroboration cannot override a binding contradiction. Claim / Record does not tag files; that is a curator job if someone continues the work.
 
-**Coverage.** Every ledger and every refusal reports:
+**Coverage.** Every ledger and every refusal reports, and the UI prints the same audit block **above and below** the rows (and after an optional narrative):
 
 - `claimantChunks` — chunks of Claim documents
 - `claimantCovered` — those overlapping an admitted from-span
 - `claimantOmitted` — the rest
+- `claimantOmittedPreviews` — first line of each uncovered chunk (trimmed, capped; still a substring of the chunk)
+- `independentDocsTotal` — Record documents in the corpus
 - `independentDocsAdmitted` — distinct Record documents on admitted sides
+- `issueStatementDenied` — `ISSUE_STATEMENT` denials
+- `contextUnverified` — rows with that status
+- `proposed` / `admitted`, plus a tally of `denied` by code
 
-A zero fabrication rate is uninformative without coverage. Thresholds are not retuned from these numbers yet. A ROC-style answer-rate vs fabrication-rate sweep is not implemented.
-
-Gold assertions live in `src/assay/calibration/`. They are not the Desktop test pile.
+A zero fabrication rate is uninformative without coverage. Thresholds are not retuned from these numbers yet.
 
 ## What this is not
 

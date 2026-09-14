@@ -31,9 +31,14 @@ Rules:
 - A grant of certiorari, a question presented, or a statement of the issue
   (including "we granted certiorari to resolve" and a quote that only asks
   whether a claim will lie) is not a holding. Do not offer it as
-  corroboration of either answer. Quote the holding.
-- If the Record both contradicts and appears to confirm the same Claim span,
-  propose only the contradiction.
+  corroboration or contradiction of either answer. Quote the holding.
+- If a Record holding contradicts a Claim span, propose only that
+  contradiction. An unmarked commentators or argument sentence is not a
+  contradiction of a Claim that a holding in these excerpts already
+  addresses. Quote the holding.
+- Every checkable Claim sentence in the excerpts is in scope. Do not stop
+  after the first few. If this Record excerpt does not speak to a Claim
+  sentence, skip that sentence in this pass; do not invent a pairing.
 - Only call a Claim statement unsupported if it makes a specific checkable
   assertion. Vague adjectives are not claims.
 - An aggregator is a conduit, not a source. A Record excerpt whose link points
