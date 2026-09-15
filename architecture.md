@@ -58,9 +58,9 @@ Exact-substring verification stops fabrication. It does not stop quote-mining. A
 
 **Discourse role** (`src/assay/bookkeeper/discourse.ts`). Expand the independent quote to its enclosing sentence (`.?!` or newline). Closed lexicon: `issue` (cert grant, question presented, whether … will lie), `argument` (petitioner argues, some courts have held, …), `holding` (`we hold`, `Held:`, …), else `unmarked`. Corroboration of `issue` or `argument` is denied `ISSUE_STATEMENT`.
 
-**Same-document holding competitor.** If the proposed independent sentence is not a holding, and another sentence in that same Record document is a holding and competes with the claim, corroboration is denied `ISSUE_STATEMENT`. The holding is not substituted for the quote.
+**Same-document holding competitor.** If the proposed independent sentence is not a holding, and another sentence in that same Record document is a holding and competes with the claim, the relation is denied `HOLDING_COMPETITOR`. The holding is not substituted for the quote.
 
-**Cross-document holding competitor.** Same check against *other* independent documents, using the claimant quote (not the independent envelope) so a scienter holding does not veto an unmarked statute sentence that only shares `10` and `b`. Two shared content tokens (≥4 letters, closed stoplist) also count as competition when IDF mass is dominated by unmatched claim words. The check applies to **contradiction** as well as corroboration: an unmarked commentators sentence cannot paint a true claim divergent when another Record document already holds on that span.
+**Cross-document holding competitor.** Same check against *other* independent documents, using the claimant quote (not the independent envelope) so a scienter holding does not veto an unmarked statute sentence that only shares `10` and `b`. Two shared content tokens (≥4 letters, closed stoplist) also count as competition when IDF mass is dominated by unmatched claim words. The check applies to every relation that asserts something about the claim — corroboration, **contradiction**, and **update** — not only corroboration: an unmarked commentators sentence cannot paint a true claim divergent when another Record document already holds on that span, whichever divergent label the model chose. Only `unsupported` bypasses it.
 
 **Residual.** An unmarked span with no holding competitor in the pile still admits as `context_unverified`. That is curator work, labeled not solved. A live ROC sweep is not implemented; canned four-class rates live in `src/assay/calibration/`.
 
@@ -76,7 +76,8 @@ Exact-substring verification stops fabrication. It does not stop quote-mining. A
 - `claimantOmittedPreviews` — first line of each uncovered chunk (trimmed, capped; still a substring of the chunk)
 - `independentDocsTotal` — Record documents in the corpus
 - `independentDocsAdmitted` — distinct Record documents on admitted sides
-- `issueStatementDenied` — `ISSUE_STATEMENT` denials
+- `issueStatementDenied` — `ISSUE_STATEMENT` denials (issue or argument sentences)
+- `holdingCompetitorDenied` — `HOLDING_COMPETITOR` denials (a non-holding sentence lost to a holding in the pile)
 - `contextUnverified` — rows with that status
 - `proposed` / `admitted`, plus a tally of `denied` by code
 
