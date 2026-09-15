@@ -18,7 +18,7 @@ The instance never fetches the web. It hashes the bytes you dropped (`src/instan
 
 Assay isolation: `src/assay` imports only itself, `zod`, `vitest`, or `node:`. Field labels (Claim / Record vs Vendor / Independent) are data on the corpus, not branches in the engine.
 
-Receipts remains the source of truth for `src/assay`. Changes land here first; subtree-push back separately.
+Receipts remains the source of truth for `src/assay`. Pull from `assay-split`; do not invent engine changes here first.
 
 ## Pipeline
 

@@ -39,7 +39,7 @@
 </head>
 <body>
   <h1>Claim / Record</h1>
-  <p class="note">Not legal advice. Quotes must be exact substrings of the files you upload. Only <code>.txt</code> and <code>.md</code>.</p>
+  <p class="note">Not legal advice. Quotes must be exact substrings of the files you upload. Only <code>.txt</code> and <code>.md</code>. The subject must appear in those quotes — a default like <code>uptime</code> will mass-deny a legal pile.</p>
   <div class="piles">
     <div class="pile" id="claim-drop">
       <h2>Claim</h2>
@@ -55,7 +55,7 @@
     </div>
   </div>
   <button type="button" class="clear-all" id="clear-all" hidden>Clear all</button>
-  <label>Subject <input id="subject" type="text" value="uptime" /></label>
+  <label>Subject <input id="subject" type="text" value="" placeholder="must appear in the quotes" /></label>
   <label>Model
     <select id="client">
       <option value="anthropic">Anthropic (ANTHROPIC_API_KEY)</option>

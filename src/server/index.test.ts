@@ -17,5 +17,8 @@ describe("createApp", () => {
     expect(html).not.toMatch(/id="narrate"[^>]*checked/)
     expect(html).toContain("context_unverified")
     expect(html).toContain("claimantCovered")
+    expect(html).not.toMatch(/id="subject"[^>]*value="uptime"/)
+    expect(html).toMatch(/id="subject"[^>]*value=""/)
+    expect(html).toContain("must appear in the quotes")
   })
 })
