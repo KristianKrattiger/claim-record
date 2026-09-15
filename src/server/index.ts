@@ -30,6 +30,10 @@ export function createApp() {
       send(res, 200, readFileSync(join(ROOT, "index.html"), "utf8"), "text/html; charset=utf-8")
       return
     }
+    if (req.method === "GET" && url === "/audit.js") {
+      send(res, 200, readFileSync(join(ROOT, "audit.js"), "utf8"), "text/javascript; charset=utf-8")
+      return
+    }
     if (req.method !== "POST" || url !== "/assay") {
       send(res, 404, { error: "not found" })
       return

@@ -8,6 +8,7 @@ This file describes what the code does. It is not a product spec and not legal a
 
 ```
 src/web/index.html     UI: Claim / Record piles, subject, Run
+src/web/audit.js       the audit line the page prints above and below the ledger; served unbundled, tested directly
 src/server/index.ts    HTTP on 127.0.0.1:8787; POST /assay
 src/instance/          pin uploads, Claim/Record prompt, Anthropic or Ollama
 src/assay/             engine (git subtree from Receipts)

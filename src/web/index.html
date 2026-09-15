@@ -66,6 +66,7 @@
   <button id="run" type="button">Run</button>
   <div id="out"></div>
   <script type="module">
+    import { formatAudit } from "./audit.js"
     const ALLOWED = new Set([".txt", ".md"])
     let nextId = 1
     const claimDocs = []
@@ -156,35 +157,7 @@
       const data = await res.json()
       if (!res.ok) { out.innerHTML = `<p class="refusal">${data.error}</p>`; return }
       const r = data.result
-      const a = r.audit ?? {}
-      function escapeHtml(s) {
-        return String(s)
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;")
-      }
-      function denialTally(denied) {
-        const counts = new Map()
-        for (const d of denied ?? []) {
-          const code = d.code ?? "?"
-          counts.set(code, (counts.get(code) ?? 0) + 1)
-        }
-        return [...counts.entries()]
-          .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-          .map(([code, n]) => `${n} ${code}`)
-          .join(", ")
-      }
-      function formatAudit(audit) {
-        const denials = denialTally(audit.denied)
-        const denialPart = denials ? ` Denials: ${escapeHtml(denials)}.` : ""
-        const previews = (audit.claimantOmittedPreviews ?? []).filter(Boolean)
-        const list = previews.length
-          ? `<ul>${previews.map((p) => `<li>${escapeHtml(p)}</li>`).join("")}</ul>`
-          : ""
-        return `<div class="audit"><p>Coverage ${audit.claimantCovered ?? "?"} / ${audit.claimantChunks ?? "?"} claimant chunks (${audit.claimantOmitted ?? "?"} omitted). Proposed ${audit.proposed ?? "?"} / admitted ${audit.admitted ?? "?"}. Record docs on ledger: ${audit.independentDocsAdmitted ?? "?"} / ${audit.independentDocsTotal ?? "?"}. Issue-statement denials: ${audit.issueStatementDenied ?? 0}. Holding-competitor denials: ${audit.holdingCompetitorDenied ?? 0}. Context-unverified: ${audit.contextUnverified ?? 0}.${denialPart}</p>${list}</div>`
-      }
-      const auditLine = formatAudit(a)
+      const auditLine = formatAudit(r.audit ?? {})
       if (r.outcome === "refusal") {
         out.innerHTML = `<p class="refusal">Refusal: ${r.reason}</p><p>${r.detail ?? ""}</p>${auditLine}`
         return
