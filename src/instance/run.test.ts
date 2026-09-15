@@ -1,9 +1,19 @@
 import { describe, expect, it } from "vitest"
 import type { ProposalClient } from "../assay/cartographer/propose.js"
+import { CLAIM_RECORD_SYSTEM } from "./prompt.js"
 import { runClaimRecord, UploadError } from "./run.js"
 
-function client(proposals: object[]): ProposalClient {
-  return { propose: async () => ({ proposals: proposals as never, stopReason: "end_turn" }) }
+type StubClient = ProposalClient & { seen: { system: string }[] }
+
+function client(proposals: object[]): StubClient {
+  const seen: { system: string }[] = []
+  return {
+    propose: async (req) => {
+      seen.push({ system: req.system })
+      return { proposals: proposals as never, stopReason: "end_turn" }
+    },
+    seen,
+  }
 }
 
 describe("runClaimRecord", () => {
@@ -63,11 +73,12 @@ describe("runClaimRecord", () => {
       from: { docId: "d0", quote: "We guarantee 99.99% uptime for every account." },
       to: null, rationale: "no record confirms this figure", confidence: 0.6,
     }
+    const stub = client([proposal])
     const base = {
       subject: "uptime",
       claim: [{ name: "a.txt", text: "We guarantee 99.99% uptime for every account." }],
       record: [{ name: "b.txt", text: "The service ran without incident for the past year." }],
-      client: client([proposal]),
+      client: stub,
     }
     const off = await runClaimRecord(base)
     expect(off.result.outcome).toBe("ledger")
@@ -75,5 +86,7 @@ describe("runClaimRecord", () => {
     const on = await runClaimRecord({ ...base, narrate: true })
     expect(on.narrative?.paragraphs.length).toBeGreaterThan(0)
     expect(on.narrative!.paragraphs[0]!.citations[0]!.text).toBe("We guarantee 99.99% uptime for every account.")
+    expect(stub.seen.length).toBeGreaterThan(0)
+    expect(stub.seen[0]!.system).toBe(CLAIM_RECORD_SYSTEM)
   })
 })

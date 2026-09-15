@@ -1,4 +1,4 @@
-import type { PinnedCorpus, PinnedDoc, SourceRole } from "../types.js"
+import type { PinnedCorpus, PinnedDoc, SourceRole } from "../../assay/types.js"
 
 function pin(docId: string, role: SourceRole, text: string): PinnedDoc {
   return {

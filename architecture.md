@@ -11,13 +11,14 @@ src/web/index.html     UI: Claim / Record piles, subject, Run
 src/web/audit.js       the audit line the page prints above and below the ledger; served unbundled, tested directly
 src/server/index.ts    HTTP on 127.0.0.1:8787; POST /assay
 src/instance/          pin uploads, Claim/Record prompt, Anthropic or Ollama
+src/instance/profile.ts  the field profile: prompt, lexicon, retrieval policy — the engine's only source of domain knowledge
 src/assay/             engine (git subtree from Receipts)
 src/narrator/          optional restatement of admitted rows; off by default
 ```
 
 The instance never fetches the web. It hashes the bytes you dropped (`src/instance/pin.ts`) and calls `assay()`. Assay never fetches either. It is pure given a pinned corpus and a proposal client.
 
-Assay isolation: `src/assay` imports only itself, `zod`, `vitest`, or `node:`. Field labels (Claim / Record vs Vendor / Independent) are data on the corpus, not branches in the engine.
+Assay isolation: `src/assay` imports only itself, `zod`, `vitest`, or `node:`. Field labels (Claim / Record vs Vendor / Independent) are data on the corpus, not branches in the engine. `src/assay/` knows no domain: it refuses to run without a `FieldProfile`.
 
 Receipts remains the source of truth for `src/assay`. Pull from `assay-split`; do not invent engine changes here first.
 
@@ -57,13 +58,13 @@ Green is not a score on the whole pile. It is this Claim sentence, confirmed by 
 
 Exact-substring verification stops fabrication. It does not stop quote-mining. Assay adds extractive checks on bytes already in the corpus, or on caller-supplied tags. It does not run a second model pass to “fix” a quote, infer peer review, or rewrite the model’s quote into a holding.
 
-**Discourse role** (`src/assay/bookkeeper/discourse.ts`). Expand the independent quote to its enclosing sentence (`.?!` or newline). Closed lexicon: `issue` (cert grant, question presented, whether … will lie), `argument` (petitioner argues, some courts have held, …), `holding` (`we hold`, `Held:`, …), else `unmarked`. Corroboration of `issue` or `argument` is denied `ISSUE_STATEMENT`.
+**Discourse role** (`src/assay/bookkeeper/discourse.ts`). Expand the independent quote to its enclosing sentence (`.?!` or newline). Closed lexicon, `CLAIM_RECORD.lexicon` (`src/instance/profile.ts`), not the engine's: `issue` (cert grant, question presented, whether … will lie), `argument` (petitioner argues, some courts have held, …), `holding` (`we hold`, `Held:`, …), else `unmarked`. Corroboration of `issue` or `argument` is denied `ISSUE_STATEMENT`.
 
 **Same-document holding competitor.** If the proposed independent sentence is not a holding, and another sentence in that same Record document is a holding and competes with the claim, the relation is denied `HOLDING_COMPETITOR`. The holding is not substituted for the quote.
 
 **Cross-document holding competitor.** Same check against *other* independent documents, using the claimant quote (not the independent envelope) so a scienter holding does not veto an unmarked statute sentence that only shares `10` and `b`. Two shared content tokens (≥4 letters, closed stoplist) also count as competition when IDF mass is dominated by unmatched claim words. The check applies to every relation that asserts something about the claim — corroboration, **contradiction**, and **update** — not only corroboration: an unmarked commentators sentence cannot paint a true claim divergent when another Record document already holds on that span, whichever divergent label the model chose. Only `unsupported` bypasses it.
 
-**Residual.** An unmarked span with no holding competitor in the pile still admits as `context_unverified`. That is curator work, labeled not solved. A live ROC sweep is not implemented; canned four-class rates live in `src/assay/calibration/`.
+**Residual.** An unmarked span with no holding competitor in the pile still admits as `context_unverified`. That is curator work, labeled not solved. A live ROC sweep is not implemented; canned four-class rates live in `src/instance/calibration/`.
 
 **Independence.** A Record span that links to a Claim-side domain is `SELF_SOURCED`. That is non-independence, not credibility.
 
