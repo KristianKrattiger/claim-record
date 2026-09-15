@@ -16,9 +16,19 @@ describe("createApp", () => {
     expect(html).toContain("id=\"narrate\"")
     expect(html).not.toMatch(/id="narrate"[^>]*checked/)
     expect(html).toContain("context_unverified")
-    expect(html).toContain("claimantCovered")
     expect(html).not.toMatch(/id="subject"[^>]*value="uptime"/)
     expect(html).toMatch(/id="subject"[^>]*value=""/)
     expect(html).toContain("must appear in the quotes")
+    expect(html).toContain('from "./audit.js"')
+  })
+
+  it("serves the audit renderer the page imports", async () => {
+    server = createApp()
+    await new Promise<void>((r) => server!.listen(0, "127.0.0.1", r))
+    const { port } = server.address() as AddressInfo
+    const res = await fetch(`http://127.0.0.1:${port}/audit.js`)
+    expect(res.status).toBe(200)
+    expect(res.headers.get("content-type")).toContain("text/javascript")
+    expect(await res.text()).toContain("export function formatAudit")
   })
 })
