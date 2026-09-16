@@ -27,7 +27,7 @@ Receipts remains the source of truth for `src/assay`. Pull from `assay-split`; d
 ```
 corpus + subject
     → chunk (offset-preserving)
-    → select candidates (IDF; pin first and last chunk per doc)
+    → select candidates (IDF; `CLAIM_RECORD.retrieval` pins first and last chunk per doc)
     → propose (model; quotes must be copied from excerpts)
     → admit (gate; model proposes, this decides)
     → assemble (ledger or typed refusal)
