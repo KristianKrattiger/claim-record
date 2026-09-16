@@ -47,7 +47,7 @@ The result header and footer print the same audit: coverage (`claimantCovered / 
 npm test
 ```
 
-Includes an in-repo 10(b)-shaped gold corpus under `src/assay/calibration/` (not the Desktop pile). One named residual case — an unmarked Record span with no holding competitor in the pile — is required to admit as `context_unverified`, not green. That leftover is curator work, labeled not solved.
+Includes an in-repo 10(b)-shaped gold corpus under `src/instance/calibration/` (not the Desktop pile). One named residual case — an unmarked Record span with no holding competitor in the pile — is required to admit as `context_unverified`, not green. That leftover is curator work, labeled not solved.
 
 ## Sync Assay
 
