@@ -2,7 +2,7 @@ import { assay } from "../assay/index.js"
 import type { ProposalClient } from "../assay/cartographer/propose.js"
 import type { AssayResult, PinnedCorpus } from "../assay/types.js"
 import { ALLOWED_EXT, extensionOf, pinCorpus, type Upload } from "./pin.js"
-import { CLAIM_RECORD } from "./profile.js"
+import { claimRecord } from "./profile.js"
 import { narrate, type Narrative } from "../narrator/narrate.js"
 
 export class UploadError extends Error {
@@ -42,7 +42,7 @@ export async function runClaimRecord(input: RunInput): Promise<RunOutput> {
   const corpus = pinCorpus(uploads, subject)
   const result = await assay(corpus, { subject }, {
     client: input.client,
-    profile: CLAIM_RECORD,
+    profile: claimRecord("frontier"),
     runs: 1,
     // More files → more independent chunks, so a 10-opinion record pile is not
     // squeezed into the same 40-slot budget as a two-file uptime fixture.

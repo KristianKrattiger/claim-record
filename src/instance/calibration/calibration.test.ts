@@ -3,7 +3,7 @@ import { assemble, NOT_ANCHORING_EVIDENCE } from "../../assay/assemble.js"
 import { admit } from "../../assay/bookkeeper/admit.js"
 import { buildIdf, tokenize } from "../../assay/retrieve/idf.js"
 import type { RelationProposal } from "../../assay/types.js"
-import { CLAIM_RECORD } from "../profile.js"
+import { claimRecord } from "../profile.js"
 import {
   ARGUMENT, CENTRAL_BANK, CLAIM, COMMENTATORS, goldCorpus, HOCHFELDER, SUBJECT, TELLABS,
 } from "./corpus.js"
@@ -23,7 +23,7 @@ function proposal(over: Partial<RelationProposal> & Pick<RelationProposal, "prop
 function run(independents: Parameters<typeof goldCorpus>[0], proposals: RelationProposal[]) {
   const corpus = goldCorpus(independents)
   const terms = tokenize(SUBJECT)
-  const result = admit(corpus, proposals, terms, buildIdf(corpus.docs), undefined, CLAIM_RECORD.lexicon)
+  const result = admit(corpus, proposals, terms, buildIdf(corpus.docs), undefined, claimRecord("frontier").lexicon)
   const anchoredCount = result.admitted.length
     + result.denied.filter((d) => !NOT_ANCHORING_EVIDENCE.has(d.code)).length
   const assembled = assemble(corpus, proposals.length, result, { conflictMode: "report", anchoredCount })

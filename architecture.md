@@ -11,7 +11,7 @@ src/web/index.html     UI: Claim / Record piles, subject, Run
 src/web/audit.js       the audit line the page prints above and below the ledger; served unbundled, tested directly
 src/server/index.ts    HTTP on 127.0.0.1:8787; POST /assay
 src/instance/          pin uploads, Claim/Record prompt, Anthropic or Ollama
-src/instance/profile.ts  the field profile: prompt, lexicon, retrieval policy — the engine's only source of domain knowledge
+src/instance/profile.ts  the field profile, by prompt tier (`frontier`, `small`; one prompt serves both today): prompt, lexicon, retrieval policy — the engine's only source of domain knowledge
 src/assay/             engine (git subtree from Receipts)
 src/narrator/          optional restatement of admitted rows; off by default
 ```
@@ -27,7 +27,7 @@ Receipts remains the source of truth for `src/assay`. Pull from `assay-split`; d
 ```
 corpus + subject
     → chunk (offset-preserving)
-    → select candidates (IDF; `CLAIM_RECORD.retrieval` pins first and last chunk per doc)
+    → select candidates (IDF; `claimRecord(tier).retrieval` pins first and last chunk per doc)
     → propose (model; quotes must be copied from excerpts)
     → admit (gate; model proposes, this decides)
     → assemble (ledger or typed refusal)
@@ -58,7 +58,7 @@ Green is not a score on the whole pile. It is this Claim sentence, confirmed by 
 
 Exact-substring verification stops fabrication. It does not stop quote-mining. Assay adds extractive checks on bytes already in the corpus, or on caller-supplied tags. It does not run a second model pass to “fix” a quote, infer peer review, or rewrite the model’s quote into a holding.
 
-**Discourse role** (`src/assay/bookkeeper/discourse.ts`). Expand the independent quote to its enclosing sentence (`.?!` or newline). Closed lexicon, `CLAIM_RECORD.lexicon` (`src/instance/profile.ts`), not the engine's: `issue` (cert grant, question presented, whether … will lie), `argument` (petitioner argues, some courts have held, …), `holding` (`we hold`, `Held:`, …), else `unmarked`. Corroboration of `issue` or `argument` is denied `ISSUE_STATEMENT`.
+**Discourse role** (`src/assay/bookkeeper/discourse.ts`). Expand the independent quote to its enclosing sentence (`.?!` or newline). Closed lexicon, `claimRecord(tier).lexicon` (`src/instance/profile.ts`), not the engine's: `issue` (cert grant, question presented, whether … will lie), `argument` (petitioner argues, some courts have held, …), `holding` (`we hold`, `Held:`, …), else `unmarked`. Corroboration of `issue` or `argument` is denied `ISSUE_STATEMENT`.
 
 **Same-document holding competitor.** If the proposed independent sentence is not a holding, and another sentence in that same Record document is a holding and competes with the claim, the relation is denied `HOLDING_COMPETITOR`. The holding is not substituted for the quote.
 
