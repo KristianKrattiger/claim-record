@@ -1,6 +1,6 @@
 import type { PinnedCorpus, PinnedDoc, SourceRole } from "../../assay/types.js"
 
-function pin(docId: string, role: SourceRole, text: string): PinnedDoc {
+export function pin(docId: string, role: SourceRole, text: string): PinnedDoc {
   return {
     docId,
     url: `https://example.com/${docId}`,

@@ -5,7 +5,7 @@ import { buildIdf, tokenize } from "../../assay/retrieve/idf.js"
 import type { RelationProposal } from "../../assay/types.js"
 import { claimRecord } from "../profile.js"
 import {
-  ARGUMENT, BLUE_CHIP, CENTRAL_BANK, CLAIM, COMMENTATORS, goldCorpus, HOCHFELDER, STATUTE, SUBJECT, TELLABS,
+  ARGUMENT, BLUE_CHIP, CENTRAL_BANK, CLAIM, COMMENTATORS, goldCorpus, HOCHFELDER, pin, STATUTE, SUBJECT, TELLABS,
 } from "./corpus.js"
 
 function proposal(over: Partial<RelationProposal> & Pick<RelationProposal, "proposalId" | "type">): RelationProposal {
@@ -162,6 +162,26 @@ describe("calibration — quote-mining gates", () => {
     expect(assembled.outcome).toBe("ledger")
     if (assembled.outcome !== "ledger") return
     expect(assembled.rows[0]!.status).toBe("corroborated")
+  })
+
+  it("labels a paraphrase-evaded contradiction disputed, not a bare divergent", () => {
+    const paraphrase = proposal({
+      proposalId: "paraphrase",
+      type: "contradicts",
+      statement: "commentators paraphrase away scienter",
+      from: { docId: "claim", quote: "Scienter, intent to deceive, manipulate, or defraud, is required in a private action under Section 10(b)." },
+      to: { docId: "commentators", quote: "Under Section 10(b), carelessness in keeping the accounts suffices for liability, as commentators have written." },
+    })
+    const { result, assembled } = run(
+      [pin("commentators", "independent", "Under Section 10(b), carelessness in keeping the accounts suffices for liability, as commentators have written."), TELLABS],
+      [paraphrase],
+    )
+    expect(result.denied).toEqual([])
+    expect(result.admitted).toHaveLength(1)
+    expect(assembled.outcome).toBe("ledger")
+    if (assembled.outcome !== "ledger") return
+    expect(assembled.rows[0]!.status).toBe("disputed")
+    expect(assembled.audit.disputed).toBe(1)
   })
 
   it("still admits an unmarked statute corroboration when an unrelated standing holding is in the pile", () => {
