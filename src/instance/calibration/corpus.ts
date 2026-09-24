@@ -36,6 +36,10 @@ export const HOCHFELDER = pin("hochfelder", "independent",
 export const STATUTE = pin("statute", "independent",
   "Section 10(b) makes it unlawful to use any manipulative or deceptive device in connection with the purchase or sale of any security.")
 
+/** Unrelated holding: same statute, different question (standing, not scienter). */
+export const BLUE_CHIP = pin("blue_chip", "independent",
+  "We hold that a private right of action under this provision extends only to actual purchasers or sellers of securities, and standing does not extend to those who merely relied on a misrepresentation without transacting.")
+
 /** Residual trap: unmarked, no holding competitor. Must still admit. */
 export const COMMENTATORS = pin("commentators", "independent",
   "A private damages action under Section 10(b) may rest on negligent bookkeeping without any allegation of scienter, as commentators have written.")

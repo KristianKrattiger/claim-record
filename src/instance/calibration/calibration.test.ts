@@ -5,7 +5,7 @@ import { buildIdf, tokenize } from "../../assay/retrieve/idf.js"
 import type { RelationProposal } from "../../assay/types.js"
 import { claimRecord } from "../profile.js"
 import {
-  ARGUMENT, CENTRAL_BANK, CLAIM, COMMENTATORS, goldCorpus, HOCHFELDER, SUBJECT, TELLABS,
+  ARGUMENT, BLUE_CHIP, CENTRAL_BANK, CLAIM, COMMENTATORS, goldCorpus, HOCHFELDER, STATUTE, SUBJECT, TELLABS,
 } from "./corpus.js"
 
 function proposal(over: Partial<RelationProposal> & Pick<RelationProposal, "proposalId" | "type">): RelationProposal {
@@ -76,6 +76,14 @@ const RESIDUAL = proposal({
   statement: "residual commentators",
   from: { docId: "claim", quote: "A private damages action under Section 10(b) may rest on negligent bookkeeping without any allegation of scienter." },
   to: { docId: "commentators", quote: "A private damages action under Section 10(b) may rest on negligent bookkeeping without any allegation of scienter, as commentators have written" },
+})
+
+const STATUTE_UNMARKED = proposal({
+  proposalId: "statute",
+  type: "corroborates",
+  statement: "statute corroborates the negligence claim",
+  from: { docId: "claim", quote: "A private damages action under Section 10(b) may rest on negligent bookkeeping without any allegation of scienter." },
+  to: { docId: "statute", quote: "Section 10(b) makes it unlawful to use any manipulative or deceptive device in connection with the purchase or sale of any security." },
 })
 
 describe("calibration — required twins", () => {
@@ -154,6 +162,15 @@ describe("calibration — quote-mining gates", () => {
     expect(assembled.outcome).toBe("ledger")
     if (assembled.outcome !== "ledger") return
     expect(assembled.rows[0]!.status).toBe("corroborated")
+  })
+
+  it("still admits an unmarked statute corroboration when an unrelated standing holding is in the pile", () => {
+    const { result, assembled } = run([STATUTE, BLUE_CHIP], [STATUTE_UNMARKED])
+    expect(result.denied).toEqual([])
+    expect(result.admitted).toHaveLength(1)
+    expect(assembled.outcome).toBe("ledger")
+    if (assembled.outcome !== "ledger") return
+    expect(assembled.rows[0]!.status).toBe("context_unverified")
   })
 })
 
