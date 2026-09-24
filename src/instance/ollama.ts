@@ -1,5 +1,14 @@
+import { z } from "zod"
 import type { ProposalClient } from "../assay/cartographer/propose.js"
 import { ProposalBatchSchema } from "../assay/cartographer/schema.js"
+
+// Ollama's `format: "json"` only constrains output to be *valid* JSON, not any
+// particular shape — a model left to guess field names from prose alone (the
+// way the Anthropic client's schema-typed structured output never has to)
+// will invent its own. Passing the real JSON Schema switches Ollama to
+// grammar-constrained decoding against these exact fields, the same guarantee
+// `betaZodOutputFormat` gives the Anthropic client.
+const RESPONSE_FORMAT = z.toJSONSchema(ProposalBatchSchema)
 
 export function ollamaClient(opts: { host?: string; model?: string } = {}): ProposalClient {
   const host = (opts.host ?? process.env["OLLAMA_HOST"] ?? "http://127.0.0.1:11434").replace(/\/$/, "")
@@ -12,10 +21,10 @@ export function ollamaClient(opts: { host?: string; model?: string } = {}): Prop
         body: JSON.stringify({
           model,
           stream: false,
-          format: "json",
+          format: RESPONSE_FORMAT,
           messages: [
             { role: "system", content: system },
-            { role: "user", content: `${user}\n\nRespond with JSON of the form {"proposals":[...]}` },
+            { role: "user", content: user },
           ],
         }),
       })
