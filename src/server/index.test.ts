@@ -31,4 +31,18 @@ describe("createApp", () => {
     expect(res.headers.get("content-type")).toContain("text/javascript")
     expect(await res.text()).toContain("export function formatAudit")
   })
+
+  it("returns 400 for an empty subject", async () => {
+    server = createApp()
+    await new Promise<void>((r) => server!.listen(0, "127.0.0.1", r))
+    const { port } = server.address() as AddressInfo
+    const res = await fetch(`http://127.0.0.1:${port}/assay`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subject: "", claim: [], record: [] }),
+    })
+    expect(res.status).toBe(400)
+    const body = await res.json() as { error: string }
+    expect(body.error).toBe("subject is required")
+  })
 })

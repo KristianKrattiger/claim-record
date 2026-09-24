@@ -55,6 +55,15 @@ describe("runClaimRecord", () => {
     })).rejects.toThrow(UploadError)
   })
 
+  it("rejects an empty subject", async () => {
+    await expect(runClaimRecord({
+      subject: "   ",
+      claim: [{ name: "a.txt", text: "x" }],
+      record: [{ name: "b.txt", text: "y" }],
+      client: client([]),
+    })).rejects.toThrow(UploadError)
+  })
+
   it("does not narrate unless asked, and only on a ledger", async () => {
     const silent = await runClaimRecord({
       subject: "uptime",
