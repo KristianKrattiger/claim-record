@@ -47,7 +47,8 @@ Claim / Record sizes the candidate budget with the pile: `max(40, 8 × uploads)`
 
 ## What a row is
 
-`divergent` — `contradicts` or `updates`.
+`divergent` — `contradicts` or `updates` whose independent sentence is a holding.
+`disputed` — `contradicts` or `updates` whose independent sentence is unmarked and no holding in the pile competes.
 `corroborated` — `corroborates` whose independent sentence is a holding.
 `context_unverified` — `corroborates` whose independent sentence is unmarked and no holding in the pile competes.
 `unverified` — `unsupported`.
@@ -62,9 +63,9 @@ Exact-substring verification stops fabrication. It does not stop quote-mining. A
 
 **Same-document holding competitor.** If the proposed independent sentence is not a holding, and another sentence in that same Record document is a holding and competes with the claim, the relation is denied `HOLDING_COMPETITOR`. The holding is not substituted for the quote.
 
-**Cross-document holding competitor.** Same check against *other* independent documents, using the claimant quote (not the independent envelope) so a scienter holding does not veto an unmarked statute sentence that only shares `10` and `b`. Two shared content tokens (≥4 letters, closed stoplist) also count as competition when IDF mass is dominated by unmatched claim words. The check applies to every relation that asserts something about the claim — corroboration, **contradiction**, and **update** — not only corroboration: an unmarked commentators sentence cannot paint a true claim divergent when another Record document already holds on that span, whichever divergent label the model chose. Only `unsupported` bypasses it.
+**Cross-document holding competitor.** Same check against *other* independent documents, but the vocabulary comparison is IDF-weighted overlap between the holding and what the claim quote and the disputed (unmarked) sentence have in common — not the claim quote alone, which an unrelated holding can resemble by incidental subject overlap (two Section 10(b) sentences that concern different questions). Requiring the shared vocabulary to be common to *both* the claim and the sentence under test narrows the match to the sentence's actual subject, so a scienter holding does not veto an unmarked statute sentence that only shares `10` and `b`. The check applies to every relation that asserts something about the claim — corroboration, **contradiction**, and **update** — not only corroboration: an unmarked commentators sentence cannot paint a true claim divergent when another Record document already holds on that span, whichever divergent label the model chose. An unmarked sentence that closely echoes the claim's own wording is caught this way; one that paraphrases it may evade the check and admit anyway, landing as `disputed` rather than a confident `divergent`. Only `unsupported` bypasses it.
 
-**Residual.** An unmarked span with no holding competitor in the pile still admits as `context_unverified`. That is curator work, labeled not solved. A live ROC sweep is not implemented; canned four-class rates live in `src/instance/calibration/`.
+**Residual.** An unmarked span with no holding competitor in the pile still admits — as `context_unverified` for corroboration, or `disputed` for contradiction/update. That is curator work, labeled not solved. A live ROC sweep is not implemented; canned four-class rates live in `src/instance/calibration/`.
 
 **Independence.** A Record span that links to a Claim-side domain is `SELF_SOURCED`. That is non-independence, not credibility.
 

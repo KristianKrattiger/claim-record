@@ -40,5 +40,5 @@ export function formatAudit(audit) {
   const list = previews.length
     ? `<ul>${previews.map((p) => `<li>${escapeHtml(p)}</li>`).join("")}</ul>`
     : ""
-  return `<div class="audit"><p>Coverage ${audit.claimantCovered ?? "?"} / ${audit.claimantChunks ?? "?"} claimant chunks (${audit.claimantOmitted ?? "?"} omitted). Proposed ${audit.proposed ?? "?"} / admitted ${audit.admitted ?? "?"}. Record docs on ledger: ${audit.independentDocsAdmitted ?? "?"} / ${audit.independentDocsTotal ?? "?"}. Issue-statement denials: ${audit.issueStatementDenied ?? 0}. Holding-competitor denials: ${audit.holdingCompetitorDenied ?? 0}. Context-unverified: ${audit.contextUnverified ?? 0}.${denialPart}</p>${list}</div>`
+  return `<div class="audit"><p>Coverage ${audit.claimantCovered ?? "?"} / ${audit.claimantChunks ?? "?"} claimant chunks (${audit.claimantOmitted ?? "?"} omitted). Proposed ${audit.proposed ?? "?"} / admitted ${audit.admitted ?? "?"}. Record docs on ledger: ${audit.independentDocsAdmitted ?? "?"} / ${audit.independentDocsTotal ?? "?"}. Issue-statement denials: ${audit.issueStatementDenied ?? 0}. Holding-competitor denials: ${audit.holdingCompetitorDenied ?? 0}. Context-unverified: ${audit.contextUnverified ?? 0}. Disputed: ${audit.disputed ?? 0}.${denialPart}</p>${list}</div>`
 }

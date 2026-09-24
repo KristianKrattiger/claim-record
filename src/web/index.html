@@ -15,11 +15,13 @@
     pre { white-space: pre-wrap; font-size: 0.85rem; }
     .row { border-left: 3px solid #888; padding-left: 0.75rem; margin: 1rem 0; }
     .divergent { border-color: #e03131; }
+    .disputed { border-color: #e8590c; }
     .unverified { border-color: #ced4da; }
     .context_unverified { border-color: #f08c00; }
     .corroborated { border-color: #2f9e44; }
     .tag { font-weight: 700; }
     .tag.divergent { color: #e03131; }
+    .tag.disputed { color: #e8590c; }
     .tag.unverified { color: #f8f9fa; }
     .tag.context_unverified { color: #f08c00; }
     .tag.corroborated { color: #2f9e44; }
@@ -66,7 +68,7 @@
   <button id="run" type="button">Run</button>
   <div id="out"></div>
   <script type="module">
-    import { formatAudit } from "./audit.js"
+    import { escapeHtml, formatAudit } from "./audit.js"
     const ALLOWED = new Set([".txt", ".md"])
     let nextId = 1
     const claimDocs = []
@@ -155,11 +157,11 @@
       }
       const res = await fetch("/assay", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
       const data = await res.json()
-      if (!res.ok) { out.innerHTML = `<p class="refusal">${data.error}</p>`; return }
+      if (!res.ok) { out.innerHTML = `<p class="refusal">${escapeHtml(data.error)}</p>`; return }
       const r = data.result
       const auditLine = formatAudit(r.audit ?? {})
       if (r.outcome === "refusal") {
-        out.innerHTML = `<p class="refusal">Refusal: ${r.reason}</p><p>${r.detail ?? ""}</p>${auditLine}`
+        out.innerHTML = `<p class="refusal">Refusal: ${r.reason}</p><p>${escapeHtml(r.detail ?? "")}</p>${auditLine}`
         return
       }
       const labels = r.labels ?? { claimant: "Claim", independent: "Record" }
@@ -167,13 +169,13 @@
         const sides = (row.sides ?? []).map((s) => {
           const doc = (r.docs ?? []).find((d) => d.docId === s.docId)
           const role = doc?.role === "claimant" ? labels.claimant : labels.independent
-          return `<div><strong>${role}</strong> ${doc?.label ?? s.docId}<blockquote>${s.text}</blockquote></div>`
+          return `<div><strong>${role}</strong> ${escapeHtml(doc?.label ?? s.docId)}<blockquote>${escapeHtml(s.text)}</blockquote></div>`
         }).join("")
         const prov = row.provenance ? ` [${row.provenance.class}]` : ""
-        return `<div class="row ${row.status}"><span class="tag ${row.status}">${row.status}</span> — ${row.statement}${prov}${sides}</div>`
+        return `<div class="row ${row.status}"><span class="tag ${row.status}">${row.status}</span> — ${escapeHtml(row.statement)}${prov}${sides}</div>`
       }).join("")
       const nar = data.narrative?.paragraphs?.length
-        ? `<h2>Narrative</h2>` + data.narrative.paragraphs.map((p) => `<p>${p.text}</p>`).join("")
+        ? `<h2>Narrative</h2>` + data.narrative.paragraphs.map((p) => `<p>${escapeHtml(p.text)}</p>`).join("")
         : ""
       out.innerHTML = auditLine + html + nar + auditLine
     })

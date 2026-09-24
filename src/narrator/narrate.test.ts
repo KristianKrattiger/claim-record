@@ -23,7 +23,7 @@ function ledger(rows: LedgerRow[]): Ledger {
     docs: [],
     failures: [],
     rows,
-    audit: { proposed: 1, admitted: rows.length, denied: [], claimantChunks: 0, claimantCovered: 0, claimantOmitted: 0, claimantOmittedPreviews: [], independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, holdingCompetitorDenied: 0, contextUnverified: 0 },
+    audit: { proposed: 1, admitted: rows.length, denied: [], claimantChunks: 0, claimantCovered: 0, claimantOmitted: 0, claimantOmittedPreviews: [], independentDocsTotal: 0, independentDocsAdmitted: 0, issueStatementDenied: 0, holdingCompetitorDenied: 0, contextUnverified: 0, disputed: 0 },
   }
 }
 
@@ -54,6 +54,17 @@ describe("checkCitations", () => {
 
   it("rejects citing only one side of a divergent row", () => {
     expect(() => checkCitations(divergent, [{
+      text: "x", citations: [{ rowIndex: 0, sideIndex: 0 }],
+    }])).toThrow(/both sides/)
+  })
+
+  it("rejects citing only one side of a disputed row", () => {
+    const disputed = ledger([row({
+      status: "disputed",
+      relation: "contradicts",
+      sides: [side("c", "We guarantee 99.99% uptime."), side("r", "four outages")],
+    })])
+    expect(() => checkCitations(disputed, [{
       text: "x", citations: [{ rowIndex: 0, sideIndex: 0 }],
     }])).toThrow(/both sides/)
   })
