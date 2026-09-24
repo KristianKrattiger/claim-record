@@ -59,8 +59,8 @@ export function checkCitations(ledger: Ledger, draft: { text: string; citations:
       }
       for (const [rowIndex, sides] of byRow) {
         const row = ledger.rows[rowIndex]!
-        if (row.status === "divergent" && sides.size < row.sides.length) {
-          throw new NarratorError(`divergent row ${rowIndex} must cite both sides`)
+        if ((row.status === "divergent" || row.status === "disputed") && sides.size < row.sides.length) {
+          throw new NarratorError(`${row.status} row ${rowIndex} must cite both sides`)
         }
       }
       return { text: p.text, citations }
