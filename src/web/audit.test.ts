@@ -5,7 +5,7 @@ const base = {
   proposed: 7, admitted: 3, denied: [],
   claimantChunks: 10, claimantCovered: 4, claimantOmitted: 6, claimantOmittedPreviews: [],
   independentDocsTotal: 3, independentDocsAdmitted: 2,
-  issueStatementDenied: 1, holdingCompetitorDenied: 2, contextUnverified: 1,
+  issueStatementDenied: 1, holdingCompetitorDenied: 2, contextUnverified: 1, disputed: 2,
 }
 
 describe("formatAudit", () => {
@@ -17,6 +17,7 @@ describe("formatAudit", () => {
     expect(html).toContain("Issue-statement denials: 1.")
     expect(html).toContain("Holding-competitor denials: 2.")
     expect(html).toContain("Context-unverified: 1.")
+    expect(html).toContain("Disputed: 2.")
   })
 
   it("tallies denials by code, most frequent first, and omits the sentence when there are none", () => {
